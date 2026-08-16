@@ -26,6 +26,24 @@ def walk_forward(X: pd.DataFrame, y: pd.Series, w: pd.Series,
     return proba.dropna()
 
 
+def backtest_positions(pos: pd.Series, spy: pd.DataFrame,
+                       cost_bps: float = COST_BPS) -> dict:
+    """Metrics for an arbitrary [0,1] position series (decision known at t,
+    applied to the t -> t+1 return)."""
+    next_ret = spy["Close"].pct_change().shift(-1).reindex(pos.index)
+    turnover = pos.diff().abs().fillna(0)
+    strat = (pos * next_ret - turnover * cost_bps / 1e4).dropna()
+
+    curve = (1 + strat).cumprod()
+    return {
+        "sharpe_net": round(float(ANN * strat.mean() / strat.std()), 2),
+        "ann_ret": round(float(strat.mean() * 252), 4),
+        "max_dd": round(float((curve / curve.cummax() - 1).min()), 4),
+        "exposure": round(float(pos.mean()), 3),
+        "daily_turnover": round(float(turnover.mean()), 4),
+    }
+
+
 def evaluate(proba: pd.Series, y: pd.Series, spy: pd.DataFrame) -> dict:
     y_te = y.reindex(proba.index)
     auc = roc_auc_score(y_te, proba)
