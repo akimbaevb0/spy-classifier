@@ -1,0 +1,14 @@
+[project]
+name = "spy-classifier"
+version = "0.2.0"
+description = "SPY direction classifier: purged CV, Optuna tuning, SHAP+MDA selection, walk-forward evaluation"
+requires-python = ">=3.11,<3.13"
+dependencies = [
+    "yfinance>=0.2",
+    "pandas>=2.0",
+    "numpy>=1.26",
+    "scikit-learn>=1.4",
+    "lightgbm>=4.0",
+    "optuna>=3.6",
+    "shap>=0.45",
+]
